@@ -168,7 +168,7 @@ mod.directive 'infiniteScroll', ['$rootScope', '$window', '$interval', 'THROTTLE
 
     if scope.infiniteScrollListenForEvent
       unregisterEventListener = $rootScope.$on scope.infiniteScrollListenForEvent, (event) ->
-        handler event, if scope.infiniteScrollReset then scroll.infiniteScrollReset else false
+        handler event, if scope.infiniteScrollReset then scope.infiniteScrollReset else false
         return
 
     handleInfiniteScrollContainer = (newContainer) ->

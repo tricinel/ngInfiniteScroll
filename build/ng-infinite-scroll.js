@@ -156,7 +156,7 @@ mod.directive('infiniteScroll', [
         changeContainer(windowElement);
         if (scope.infiniteScrollListenForEvent) {
           unregisterEventListener = $rootScope.$on(scope.infiniteScrollListenForEvent, function(event) {
-            handler(event, scope.infiniteScrollReset ? scroll.infiniteScrollReset : false);
+            handler(event, scope.infiniteScrollReset ? scope.infiniteScrollReset : false);
           });
         }
         handleInfiniteScrollContainer = function(newContainer) {
