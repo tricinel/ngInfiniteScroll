@@ -11,6 +11,7 @@ mod.directive 'infiniteScroll', ['$rootScope', '$window', '$interval', 'THROTTLE
     infiniteScrollDisabled: '='
     infiniteScrollUseDocumentBottom: '=',
     infiniteScrollListenForEvent: '@'
+    infiniteScrollReset: '='
 
   link: (scope, elem, attrs) ->
     windowElement = angular.element($window)
@@ -46,7 +47,8 @@ mod.directive 'infiniteScroll', ['$rootScope', '$window', '$interval', 'THROTTLE
     # document. It is recommended to use infinite-scroll-disabled
     # with a boolean that is set to true when the function is
     # called in order to throttle the function call.
-    handler = ->
+    handler = (event, reset) ->
+      reset = reset || false
       if container == windowElement
         containerBottom = height(container) + pageYOffset(container[0].document.documentElement)
         elementBottom = offsetTop(elem) + height(elem)
@@ -61,10 +63,12 @@ mod.directive 'infiniteScroll', ['$rootScope', '$window', '$interval', 'THROTTLE
         elementBottom = height((elem[0].ownerDocument || elem[0].document).documentElement)
 
       remaining = elementBottom - containerBottom
-      shouldScroll = remaining <= height(container) * scrollDistance + 1
+      shouldScroll = if reset then true else remaining <= height(container) * scrollDistance + 1
 
       if shouldScroll
         checkWhenEnabled = true
+
+        scrollEnabled = if reset then true else scrollEnabled
 
         if scrollEnabled
           if scope.$$phase || $rootScope.$$phase
@@ -108,7 +112,7 @@ mod.directive 'infiniteScroll', ['$rootScope', '$window', '$interval', 'THROTTLE
       if unregisterEventListener?
         unregisterEventListener()
         unregisterEventListener = null
-      if checkInterval 
+      if checkInterval
         $interval.cancel checkInterval
 
     # infinite-scroll-distance specifies how close to the bottom of the page
@@ -163,7 +167,9 @@ mod.directive 'infiniteScroll', ['$rootScope', '$window', '$interval', 'THROTTLE
     changeContainer windowElement
 
     if scope.infiniteScrollListenForEvent
-      unregisterEventListener = $rootScope.$on scope.infiniteScrollListenForEvent, handler
+      unregisterEventListener = $rootScope.$on scope.infiniteScrollListenForEvent, (event) ->
+        handler event, if scope.infiniteScrollReset then scroll.infiniteScrollReset else false
+        return
 
     handleInfiniteScrollContainer = (newContainer) ->
       # TODO: For some reason newContainer is sometimes null instead
